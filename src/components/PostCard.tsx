@@ -3,16 +3,14 @@ import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, Calendar, User, Edit, Save, X, Upload, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Edit, Save, X, Upload, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
-import AuthModal from '@/components/AuthModal';
 
 interface PostCardProps {
   post: {
@@ -225,7 +223,7 @@ const PostCard = ({ post }: PostCardProps) => {
         const filesToDelete = mediaToRemove.map(url => {
           const fileName = url.split('/').pop();
           return fileName;
-        }).filter(Boolean);
+        }).filter((fileName): fileName is string => Boolean(fileName));
 
         if (filesToDelete.length > 0) {
           await supabase.storage
@@ -336,13 +334,12 @@ const PostCard = ({ post }: PostCardProps) => {
 
   return (
     <>
-      <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
+      <div className="bg-white border border-gray-100 rounded-lg p-6 hover:border-gray-200 transition-colors">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <User className="h-4 w-4" />
+            <div className="flex items-center gap-3 text-sm text-gray-500">
               <span>{post.email}</span>
-              <Calendar className="h-4 w-4 ml-2" />
+              <span>•</span>
               <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
               {isEdited && (
                 <Badge variant="outline" className="text-xs">
@@ -355,50 +352,51 @@ const PostCard = ({ post }: PostCardProps) => {
                 variant="ghost"
                 size="sm"
                 onClick={handleEditToggle}
-                className="flex items-center gap-1"
+                className="h-8 px-3 text-sm"
               >
                 {isEditing ? <X className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
-                {isEditing ? 'Cancel' : 'Edit'}
               </Button>
             )}
           </div>
+          
           {isEditing ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-title">Title</Label>
+                <Label htmlFor="edit-title" className="text-sm font-medium">Title</Label>
                 <Input
                   id="edit-title"
                   value={editForm.title}
                   onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Enter post title"
+                  className="mt-1"
                 />
               </div>
             </div>
           ) : (
             <Link to={`/posts/${post.id}`}>
-              <h3 className="text-lg font-semibold hover:text-blue-600 transition-colors">
+              <h3 className="text-lg font-medium hover:text-gray-600 transition-colors">
                 {post.title}
               </h3>
             </Link>
           )}
-        </CardHeader>
-        <CardContent className="space-y-4">
+          
           {isEditing ? (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-content">Content</Label>
+                <Label htmlFor="edit-content" className="text-sm font-medium">Content</Label>
                 <Textarea
                   id="edit-content"
                   value={editForm.content}
                   onChange={(e) => setEditForm(prev => ({ ...prev, content: e.target.value }))}
                   placeholder="Write your content here..."
                   rows={4}
+                  className="mt-1"
                 />
               </div>
 
               <div>
-                <Label>Tags</Label>
-                <div className="flex gap-2 mb-2">
+                <Label className="text-sm font-medium">Tags</Label>
+                <div className="flex gap-2 mb-2 mt-1">
                   <Input
                     value={editForm.tagInput}
                     onChange={(e) => setEditForm(prev => ({ ...prev, tagInput: e.target.value }))}
@@ -425,8 +423,8 @@ const PostCard = ({ post }: PostCardProps) => {
               </div>
 
               <div>
-                <Label>Add New Media</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-2">
+                <Label className="text-sm font-medium">Add New Media</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-2 mt-1">
                   <input
                     type="file"
                     multiple
@@ -465,7 +463,7 @@ const PostCard = ({ post }: PostCardProps) => {
               </div>
             </div>
           ) : (
-            <p className="text-gray-700 line-clamp-3">{post.content}</p>
+            <p className="text-gray-600 text-sm leading-relaxed">{post.content}</p>
           )}
           
           {(post.media_urls.length > 0 || isEditing) && (
@@ -489,7 +487,7 @@ const PostCard = ({ post }: PostCardProps) => {
             </div>
           )}
           
-          <div className="flex items-center gap-4 pt-2">
+          <div className="flex items-center gap-4 pt-2 border-t border-gray-50">
             {isEditing ? (
               <div className="flex gap-2 w-full">
                 <Button onClick={handleSaveEdit} disabled={saving} className="flex-1">
@@ -503,28 +501,28 @@ const PostCard = ({ post }: PostCardProps) => {
             ) : (
               <>
                 <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLike}
-              className={`flex items-center gap-1 ${
-                likeData?.userLiked ? 'text-red-500' : 'text-gray-500'
-              }`}
-            >
-              <Heart className={`h-4 w-4 ${likeData?.userLiked ? 'fill-current' : ''}`} />
-              <span>{likeData?.count || 0}</span>
-            </Button>
-            
-            <Link to={`/posts/${post.id}`}>
-              <Button variant="ghost" size="sm" className="flex items-center gap-1 text-gray-500">
-                <MessageCircle className="h-4 w-4" />
-                <span>{commentCount || 0}</span>
-              </Button>
-            </Link>
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLike}
+                  className={`flex items-center gap-1 h-8 px-3 ${
+                    likeData?.userLiked ? 'text-red-500' : 'text-gray-500'
+                  }`}
+                >
+                  <Heart className={`h-4 w-4 ${likeData?.userLiked ? 'fill-current' : ''}`} />
+                  <span>{likeData?.count || 0}</span>
+                </Button>
+                
+                <Link to={`/posts/${post.id}`}>
+                  <Button variant="ghost" size="sm" className="flex items-center gap-1 text-gray-500 h-8 px-3">
+                    <MessageCircle className="h-4 w-4" />
+                    <span>{commentCount || 0}</span>
+                  </Button>
+                </Link>
               </>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </>
   );
 };

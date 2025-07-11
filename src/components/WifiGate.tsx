@@ -36,7 +36,7 @@ const WifiGate = () => {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="password">Enter the NS WiFi password to proceed</Label>
+            <Label htmlFor="password">Enter the password to proceed</Label>
             <Input
               id="password"
               type="password"

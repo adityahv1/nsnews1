@@ -9,7 +9,6 @@ import Layout from '@/components/Layout';
 import HomePage from '@/pages/HomePage';
 import PostDetail from '@/pages/PostDetail';
 import CreatePost from '@/pages/CreatePost';
-import PollsPage from '@/pages/PollsPage';
 import ProfilePage from '@/pages/ProfilePage';
 import ProfileSettings from '@/pages/ProfileSettings';
 import './App.css';
@@ -29,7 +28,6 @@ function AppContent() {
         <Route path="/" element={<HomePage />} />
         <Route path="/posts/new" element={<CreatePost />} />
         <Route path="/posts/:id" element={<PostDetail />} />
-        <Route path="/polls" element={<PollsPage />} />
         <Route path="/profile/:username" element={<ProfilePage />} />
         <Route path="/settings" element={<ProfileSettings />} />
       </Routes>

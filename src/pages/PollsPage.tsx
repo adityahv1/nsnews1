@@ -1,11 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Users, Vote, BarChart3 } from 'lucide-react';
+import { ChevronUp, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 const TEAMS = [
@@ -123,7 +121,7 @@ const PollsPage = () => {
 
   const handleVote = (teamName: string) => {
     if (!user) {
-      toast.error('Please sign in to vote');
+      // Don't show error toast, let AuthModal handle the sign in flow
       return;
     }
     
@@ -138,91 +136,90 @@ const PollsPage = () => {
   if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardContent className="animate-pulse p-6">
-            <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-medium text-gray-900">NS Cup Team Rankings</h1>
+            <p className="text-gray-500">Vote for your favorite team in the competition</p>
+          </div>
+          
+          <div className="animate-pulse space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-white border border-gray-100 rounded-lg p-4 h-16"></div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-6 w-6" />
-            NS Cup Opinion Poll
-          </CardTitle>
-          <p className="text-gray-600">Vote for your favorite team! One vote per user. All votes are anonymous.</p>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-6 text-center">
-            <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                <span>{pollData?.totalVotes || 0} total votes</span>
-              </div>
-              {pollData?.userVote && (
-                <Badge variant="outline" className="flex items-center gap-1">
-                  <Vote className="h-3 w-3" />
-                  You voted: {pollData.userVote.team_name}
-                </Badge>
-              )}
-            </div>
-          </div>
+      <div className="space-y-1">
+        <h1 className="text-2xl font-medium text-gray-900">NS Cup Team Rankings</h1>
+        <p className="text-gray-500">Vote for your favorite team in the competition</p>
+      </div>
 
-          <div className="space-y-4">
-            {pollData?.sortedTeams.map((team, index) => (
-              <div key={team.name} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-lg">#{index + 1}</span>
-                      {index < 3 && (
-                        <Trophy className={`h-5 w-5 ${
-                          index === 0 ? 'text-yellow-500' : 
-                          index === 1 ? 'text-gray-400' : 
-                          'text-amber-600'
-                        }`} />
-                      )}
-                    </div>
-                    <h3 className="font-semibold text-lg">{team.name}</h3>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="font-bold text-lg">{team.votes}</p>
-                      <p className="text-sm text-gray-500">{team.percentage.toFixed(1)}%</p>
-                    </div>
-                    {!pollData?.userVote && user && (
-                      <Button
-                        onClick={() => handleVote(team.name)}
-                        disabled={voteMutation.isPending}
-                        className="min-w-[80px]"
-                      >
-                        {voteMutation.isPending ? 'Voting...' : 'Vote'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                <Progress value={team.percentage} className="h-3" />
-              </div>
-            ))}
+      <div className="text-center space-y-2">
+        <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            <span>{pollData?.totalVotes || 0} total votes</span>
           </div>
-
-          {!user && (
-            <div className="text-center mt-6 p-4 bg-gray-50 rounded-lg">
-              <p className="text-gray-600">Sign in to vote for your favorite team!</p>
-            </div>
+          {pollData?.userVote && (
+            <Badge variant="outline" className="text-xs">
+              You voted: {pollData.userVote.team_name}
+            </Badge>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {pollData?.sortedTeams.map((team, index) => (
+          <div key={team.name} className="bg-white border border-gray-100 rounded-lg p-4 hover:border-gray-200 transition-colors">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-400 w-6">
+                  #{index + 1}
+                </span>
+                <span className="font-medium text-gray-900">
+                  {team.name}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium text-gray-600">
+                  {team.votes} votes
+                </span>
+                
+                {user ? (
+                  <Button
+                    size="sm"
+                    variant={pollData?.userVote?.team_name === team.name ? "default" : "outline"}
+                    onClick={() => handleVote(team.name)}
+                    disabled={voteMutation.isPending || !!pollData?.userVote}
+                    className="h-8 px-3 flex items-center gap-1"
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                    <span className="text-xs">
+                      {pollData?.userVote?.team_name === team.name ? "Voted" : "Vote"}
+                    </span>
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => toast.error('Please sign up to vote! Use the Sign Up / Login button in the top right.')}
+                    className="h-8 px-3 flex items-center gap-1"
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                    <span className="text-xs">Vote</span>
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
